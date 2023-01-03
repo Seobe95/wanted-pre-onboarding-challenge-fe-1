@@ -1,12 +1,12 @@
-import styled from "styled-components";
-import { AuthInputForm } from "../../hooks/auth/types";
-import Button from "../base/Button";
+import styled from 'styled-components';
+import { AuthInputForm } from '../../hooks/auth/types';
+import Button from '../base/Button';
 
 interface AuthFormProps {
-  type: "login" | "regist";
+  type: 'login' | 'regist';
   form: AuthInputForm;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onAuthTypeChange: (e: "login" | "regist") => void;
+  onAuthTypeChange: (e: 'login' | 'regist') => void;
   login: () => void;
   regist: () => void;
 }
@@ -50,7 +50,7 @@ const Footer = styled.div`
 `;
 
 const AuthForm = ({
-  type = "login",
+  type = 'login',
   form,
   onInputChange,
   onAuthTypeChange,
@@ -59,8 +59,17 @@ const AuthForm = ({
 }: AuthFormProps) => {
   return (
     <AuthFormBlock>
-      <h3>{type === "login" ? "로그인" : "회원가입"}</h3>
-      <form>
+      <h3>{type === 'login' ? '로그인' : '회원가입'}</h3>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (type === 'login') {
+            login();
+          } else {
+            regist();
+          }
+        }}
+      >
         <StyledInput
           type="email"
           placeholder="아이디"
@@ -75,27 +84,26 @@ const AuthForm = ({
           value={form.password}
           onChange={onInputChange}
         />
-        {type === "regist" && (
-          <StyledInput type="password" placeholder="비밀번호 확인" />
+        {type === 'regist' && (
+          <StyledInput
+            id="passwordConfirm"
+            type="password"
+            placeholder="비밀번호 확인"
+            value={form.passwordConfirm}
+            onChange={onInputChange}
+          />
         )}
         <ButtonWithMarginTop
           disabled={false}
-          type={"button"}
+          type={'submit'}
           fullWidth
           className="button-with-margin-top"
-          onClick={() => {
-            if (type === "login") {
-              login();
-            } else {
-              regist();
-            }
-          }}
         >
-          {type === "login" ? "로그인" : "회원가입"}
+          {type === 'login' ? '로그인' : '회원가입'}
         </ButtonWithMarginTop>
       </form>
       <Footer onClick={() => onAuthTypeChange(type)}>
-        {type !== "login" ? "로그인" : "회원가입"}
+        {type !== 'login' ? '로그인' : '회원가입'}
       </Footer>
     </AuthFormBlock>
   );

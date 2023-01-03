@@ -1,6 +1,5 @@
-import React from "react";
-import styled from "styled-components";
-import AuthForm from "./AuthForm";
+import React from 'react';
+import styled from 'styled-components';
 
 interface AuthTemplateProps {
   children: React.ReactNode;

@@ -1,12 +1,11 @@
-import styled, { css } from "styled-components";
+import styled, { css } from 'styled-components';
 
 interface ButtonProps {
   children: string;
   fullWidth: boolean;
-  disabled: boolean;
-  className: string;
-  onClick: React.MouseEventHandler<HTMLButtonElement>;
-  type: "button" | "submit" | "reset" | undefined;
+  disabled?: boolean;
+  className?: string;
+  type?: 'button' | 'submit' | 'reset' | undefined;
 }
 
 const StyledButton = styled.button<{ fullWidth: boolean }>`
@@ -45,7 +44,6 @@ const Button = ({
   disabled,
   fullWidth,
   className,
-  onClick,
   type,
 }: ButtonProps) => {
   return (
@@ -53,7 +51,6 @@ const Button = ({
       disabled={disabled}
       fullWidth={fullWidth}
       className={className}
-      onClick={onClick}
       type={type}
     >
       {children}
