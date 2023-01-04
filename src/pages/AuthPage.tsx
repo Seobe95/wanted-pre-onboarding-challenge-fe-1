@@ -1,6 +1,6 @@
 import AuthForm from '../components/auth/AuthForm';
 import AuthTemplate from '../components/auth/AuthTemplate';
-import useAuth from '../hooks/auth/useAuth';
+import useAuth from '../hooks/auth/useAuthInput';
 import useLoginMutation from '../hooks/auth/useLoginMutation';
 import useRegistMutation from '../hooks/auth/useRegistMutation';
 

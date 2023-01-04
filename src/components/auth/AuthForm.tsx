@@ -74,19 +74,19 @@ const AuthForm = ({
           type="email"
           placeholder="아이디"
           value={form.id}
-          id="id"
+          name="id"
           onChange={onInputChange}
         />
         <StyledInput
           type="password"
           placeholder="비밀번호"
-          id="password"
+          name="password"
           value={form.password}
           onChange={onInputChange}
         />
         {type === 'regist' && (
           <StyledInput
-            id="passwordConfirm"
+            name="passwordConfirm"
             type="password"
             placeholder="비밀번호 확인"
             value={form.passwordConfirm}

@@ -17,3 +17,11 @@ export const getLocalStorage = (value: string) => {
     console.error(err);
   }
 };
+
+export const deleteLocalStorage = (key: string) => {
+  try {
+    localStorage.removeItem(key);
+  } catch (err) {
+    console.log(err);
+  }
+};

@@ -6,6 +6,7 @@ interface ButtonProps {
   disabled?: boolean;
   className?: string;
   type?: 'button' | 'submit' | 'reset' | undefined;
+  onClick?: () => void;
 }
 
 const StyledButton = styled.button<{ fullWidth: boolean }>`
@@ -45,6 +46,7 @@ const Button = ({
   fullWidth,
   className,
   type,
+  onClick,
 }: ButtonProps) => {
   return (
     <StyledButton
@@ -52,6 +54,7 @@ const Button = ({
       fullWidth={fullWidth}
       className={className}
       type={type}
+      onClick={onClick}
     >
       {children}
     </StyledButton>

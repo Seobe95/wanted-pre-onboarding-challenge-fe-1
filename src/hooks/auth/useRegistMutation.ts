@@ -1,9 +1,11 @@
 import { AxiosError } from 'axios';
 import { useMutation, UseMutationResult } from 'react-query';
+import { useNavigate } from 'react-router-dom';
 import client from '../../lib/api/client';
 import { setLocalstorage } from '../../lib/function/localstorage';
 import { verifyEmail } from '../../lib/function/verify';
 import { AuthFetchResult, AuthInputForm } from './types';
+import useAuthStore from './useAuthStore';
 
 /** 회원가입시 사용하는 비동기 작업을 관리하는 hook */
 export default function useRegistMutation(): UseMutationResult<
@@ -11,6 +13,8 @@ export default function useRegistMutation(): UseMutationResult<
   AxiosError,
   AuthInputForm
 > {
+  const setToken = useAuthStore((state) => state.setToken);
+  const navigate = useNavigate();
   return useMutation(
     async (params) => {
       if (
@@ -39,7 +43,8 @@ export default function useRegistMutation(): UseMutationResult<
       mutationKey: 'REGIST',
       onSuccess(e) {
         setLocalstorage(e.token);
-        window.location.href = '/';
+        setToken(e.token);
+        navigate('/');
       },
       onError(error) {
         alert('로그인에 실패하였습니다.');
