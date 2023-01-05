@@ -2,9 +2,7 @@ import styled from 'styled-components';
 import { Link, useNavigate } from 'react-router-dom';
 import Button from './Button';
 import Responsive from './Responsive';
-import { useEffect, useState } from 'react';
-import useAuth from '../../hooks/auth/useAuthInput';
-import { deleteLocalStorage } from '../../lib/function/localstorage';
+import useAuthStore from '../../hooks/auth/useAuthStore';
 
 const HeaderBlock = styled.div`
   position: fixed;
@@ -35,7 +33,7 @@ const Spacer = styled.div`
 
 const Header = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout } = useAuthStore();
   return (
     <>
       <HeaderBlock>
@@ -47,7 +45,7 @@ const Header = () => {
             <Button
               fullWidth={false}
               onClick={() => {
-                logout('token');
+                logout();
                 alert('로그아웃 하셨습니다.');
                 return navigate('/auth');
               }}

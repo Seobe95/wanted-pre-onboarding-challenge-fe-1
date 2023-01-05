@@ -3,12 +3,10 @@ import {
   useDeleteTodoMutation,
   useGetTodoByIdQuery,
   useUpdateTodoMutation,
-} from '../../hooks/todos/useFetchTodo';
+} from '../../hooks/todos/useTodoFetch';
 import useAuthStore from '../../hooks/auth/useAuthStore';
 import Button from '../base/Button';
-import useTodo from '../../hooks/todos/useTodo';
-import useTodoInputStore from '../../hooks/todos/useTodoInputStore';
-import shallow from 'zustand/shallow';
+import useTodoStore from '../../hooks/todos/useTodoStore';
 import { useEffect } from 'react';
 
 interface TodoDetailProps {
@@ -66,41 +64,35 @@ const TodoDetail = ({ id }: TodoDetailProps) => {
   const { data } = useGetTodoByIdQuery({ token, id });
   const { mutate: update } = useUpdateTodoMutation();
   const { mutate: deleteTodo } = useDeleteTodoMutation();
-  const {
-    form,
-    initialize,
-    onInputChange,
-    isEditMode,
-    setIsEditMode,
-    setTitle,
-    setContent,
-  } = useTodo();
+  const { form, onInputChange, isEditMode, setIsEditMode, setForm } =
+    useTodoStore();
 
   useEffect(() => {
-    if (data) {
-      setTitle(data?.title);
-      setContent(data?.content);
+    if (data && !isEditMode) {
+      setForm(data.title, data.content);
     }
-  }, [data, setTitle, setContent, isEditMode]);
+    if (data && isEditMode) {
+      setForm(form.title, form.content);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, data]);
 
   if (data === undefined) {
     return <p>에러가 발생하였습니다.</p>;
   }
+  const title = data.title !== form.title ? form.title : data.title;
+  const content = data.content !== form.content ? form.content : data.content;
   if (isEditMode) {
     return (
       <TodoDetailBlock>
         <StyledTitle>
-          <StyledInput
-            value={form.title}
-            onChange={onInputChange}
-            name="title"
-          />
+          <StyledInput value={title} onChange={onInputChange} name="title" />
           <div>
             <MarginRightWithButton
               fullWidth={false}
               onClick={() => {
                 update({ id, title: form.title, content: form.content, token });
-                setIsEditMode((prev) => !prev);
+                setIsEditMode();
               }}
             >
               수정 완료
@@ -108,8 +100,8 @@ const TodoDetail = ({ id }: TodoDetailProps) => {
             <Button
               fullWidth={false}
               onClick={() => {
-                initialize();
-                setIsEditMode((prev) => !prev);
+                setForm(data.title, data.content);
+                setIsEditMode();
               }}
             >
               수정 취소
@@ -117,7 +109,7 @@ const TodoDetail = ({ id }: TodoDetailProps) => {
           </div>
         </StyledTitle>
         <StyledInputContent
-          value={form.content}
+          value={content}
           onChange={onInputChange}
           name="content"
         />
@@ -132,7 +124,7 @@ const TodoDetail = ({ id }: TodoDetailProps) => {
           <MarginRightWithButton
             fullWidth={false}
             onClick={() => {
-              setIsEditMode((prev) => !prev);
+              setIsEditMode();
             }}
           >
             수정

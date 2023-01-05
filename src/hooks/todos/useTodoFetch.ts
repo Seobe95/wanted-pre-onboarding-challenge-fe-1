@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import client from '../../lib/api/client';
 import { TodoFetchResult, TodoInputForm } from './types';
-import useTodoInputStore from './useTodoInputStore';
+import useTodoStore from './useTodoStore';
+import useTodoInputStore from './useTodoStore';
 
 interface CreateTodoPrameterType extends TodoInputForm {
   token: string;
@@ -15,11 +16,13 @@ interface EditTodoPrameterType extends CreateTodoPrameterType {
 
 export const useCreateTodoQuery = () => {
   const queryClient = useQueryClient();
+  const initialize = useTodoStore((state) => state.initialize);
   return useMutation<TodoFetchResult, AxiosError, CreateTodoPrameterType>(
     async ({ title, content, token }: CreateTodoPrameterType) => {
       const response = await client.post<
-        TodoInputForm,
-        { data: TodoFetchResult }
+        TodoFetchResult,
+        { data: TodoFetchResult },
+        TodoInputForm
       >(
         '/todos',
         {
@@ -35,36 +38,30 @@ export const useCreateTodoQuery = () => {
       return response.data;
     },
     {
+      onSuccess: () => {
+        queryClient.invalidateQueries('GET_TODO_LIST');
+        initialize();
+      },
       onError: (error) => {
         console.error(error);
-      },
-      onSuccess: (data) => {
-        console.log(data);
-        queryClient.invalidateQueries('GET_TODO_LIST');
       },
     },
   );
 };
 
 export const useGetTodoQuery = ({ token }: { token: string }) => {
-  return useQuery<
-    { data: { data: TodoFetchResult[] } },
-    AxiosError,
-    { data: TodoFetchResult[] }
-  >(
+  return useQuery<{ data: TodoFetchResult[] }, AxiosError, TodoFetchResult[]>(
     ['GET_TODO_LIST', token],
-    async (token): Promise<{ data: { data: TodoFetchResult[] } }> => {
+    async (token): Promise<{ data: TodoFetchResult[] }> => {
       const response = await client.get('/todos', {
         headers: {
           Authorization: `${token}`,
         },
       });
-      return response.data;
+      return response.data.data;
     },
     {
-      onSuccess: (data) => {
-        console.log(data);
-      },
+      onSuccess: (data) => {},
       onError: (error) => {
         console.error(error);
       },
@@ -78,7 +75,7 @@ const fetchTodo = async (
   token: string,
   id: string,
 ): Promise<TodoFetchResult> => {
-  const response = await client.get(`/todos/${id}`, {
+  const response = await client.get<{ data: TodoFetchResult }>(`/todos/${id}`, {
     headers: {
       Authorization: token,
     },
@@ -92,13 +89,16 @@ export const useGetTodoByIdQuery = ({
   token: string;
   id: string;
 }) => {
-  return useQuery(
+  return useQuery<TodoFetchResult, AxiosError, TodoFetchResult>(
     ['GET_TODO_LIST_BY_ID', { token: token, id: id }],
     () => fetchTodo(token, id),
     {
-      onSuccess: (data) => {
-        console.log(data);
+      onSuccess: () => {},
+      onError: (error) => {
+        console.error(error);
       },
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
     },
   );
 };
@@ -122,7 +122,7 @@ export const useUpdateTodoMutation = () => {
       return response.data.data;
     },
     {
-      onSuccess: (data) => {
+      onSuccess: () => {
         queryClient.invalidateQueries('GET_TODO_LIST');
         queryClient.invalidateQueries('GET_TODO_LIST_BY_ID');
       },
@@ -151,7 +151,7 @@ export const useDeleteTodoMutation = () => {
       return response.data.data;
     },
     {
-      onSuccess: (data) => {
+      onSuccess: () => {
         queryClient.invalidateQueries('GET_TODO_LIST');
         initialize();
         navigate('/', {

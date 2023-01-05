@@ -1,15 +1,10 @@
 import styled from 'styled-components';
-import { AuthInputForm } from '../../hooks/auth/types';
+import {
+  useLoginMutation,
+  useRegistMutation,
+} from '../../hooks/auth/useAuthFetch';
+import useAuthStore from '../../hooks/auth/useAuthStore';
 import Button from '../base/Button';
-
-interface AuthFormProps {
-  type: 'login' | 'regist';
-  form: AuthInputForm;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onAuthTypeChange: (e: 'login' | 'regist') => void;
-  login: () => void;
-  regist: () => void;
-}
 
 const AuthFormBlock = styled.div`
   h3 {
@@ -49,24 +44,20 @@ const Footer = styled.div`
   }
 `;
 
-const AuthForm = ({
-  type = 'login',
-  form,
-  onInputChange,
-  onAuthTypeChange,
-  login,
-  regist,
-}: AuthFormProps) => {
+const AuthForm = () => {
+  const { form, setType, onInputChange, type } = useAuthStore();
+  const { mutate: login } = useLoginMutation();
+  const { mutate: regist } = useRegistMutation();
   return (
     <AuthFormBlock>
-      <h3>{type === 'login' ? '로그인' : '회원가입'}</h3>
+      <h3>{type === 'LOGIN' ? '로그인' : '회원가입'}</h3>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (type === 'login') {
-            login();
+          if (type === 'LOGIN') {
+            login({ ...form });
           } else {
-            regist();
+            regist({ ...form });
           }
         }}
       >
@@ -84,7 +75,7 @@ const AuthForm = ({
           value={form.password}
           onChange={onInputChange}
         />
-        {type === 'regist' && (
+        {type === 'REGIST' && (
           <StyledInput
             name="passwordConfirm"
             type="password"
@@ -99,11 +90,11 @@ const AuthForm = ({
           fullWidth
           className="button-with-margin-top"
         >
-          {type === 'login' ? '로그인' : '회원가입'}
+          {type === 'LOGIN' ? '로그인' : '회원가입'}
         </ButtonWithMarginTop>
       </form>
-      <Footer onClick={() => onAuthTypeChange(type)}>
-        {type !== 'login' ? '로그인' : '회원가입'}
+      <Footer onClick={setType}>
+        {type !== 'LOGIN' ? '로그인' : '회원가입'}
       </Footer>
     </AuthFormBlock>
   );

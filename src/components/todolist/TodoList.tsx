@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import shallow from 'zustand/shallow';
+import useAuthStore from '../../hooks/auth/useAuthStore';
 import { TodoFetchResult } from '../../hooks/todos/types';
+import { useGetTodoQuery } from '../../hooks/todos/useTodoFetch';
+import useTodoStore from '../../hooks/todos/useTodoStore';
 import Responsive from '../base/Responsive';
-
-interface TodoListProps {
-  item: TodoFetchResult[] | undefined;
-}
 
 interface TodoItemProps {
   item: TodoFetchResult;
@@ -44,20 +44,40 @@ const TodoItemBlock = styled.div`
 
 const TodoItem = ({ item }: TodoItemProps) => {
   const { id, content, title } = item;
+  const { initialize, isEditMode, setIsEditMode } = useTodoStore(
+    (state) => ({
+      initialize: state.initialize,
+      isEditMode: state.isEditMode,
+      setIsEditMode: state.setIsEditMode,
+    }),
+    shallow,
+  );
+  const onClick = () => {
+    if (isEditMode) {
+      initialize();
+      setIsEditMode();
+    }
+  };
   return (
     <TodoItemBlock>
       <h2>
-        <Link to={`/${id}`}>{title}</Link>
+        <Link to={`/${id}`} onClick={onClick}>
+          {title}
+        </Link>
       </h2>
       <p>{content}</p>
     </TodoItemBlock>
   );
 };
 
-const TodoList = ({ item }: TodoListProps) => {
+const TodoList = () => {
+  const { token } = useAuthStore();
+  const { data: item } = useGetTodoQuery({ token });
+
   if (item === undefined || item.length === 0) {
     return <p>할 일을 등록하세요.</p>;
   }
+
   return (
     <TodoListBlock>
       {item.map((item) => {

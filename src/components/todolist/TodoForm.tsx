@@ -1,7 +1,8 @@
+import { useEffect } from 'react';
 import styled from 'styled-components';
 import useAuthStore from '../../hooks/auth/useAuthStore';
-import { useCreateTodoQuery } from '../../hooks/todos/useFetchTodo';
-import useTodo from '../../hooks/todos/useTodo';
+import { useCreateTodoQuery } from '../../hooks/todos/useTodoFetch';
+import useTodoStore from '../../hooks/todos/useTodoStore';
 import Button from '../base/Button';
 
 const TodoFormBlock = styled.div`
@@ -46,8 +47,11 @@ const StyledInputWithMarginTop = styled(StyledInput)`
 
 const TodoForm = () => {
   const token = useAuthStore((state) => state.token);
-  const { form, initialize, onInputChange } = useTodo();
+  const { form, initialize, onInputChange } = useTodoStore();
   const create = useCreateTodoQuery();
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
 
   return (
     <TodoFormBlock>
