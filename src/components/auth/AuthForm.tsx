@@ -1,9 +1,11 @@
 import styled from 'styled-components';
+import { AuthInputForm } from '../../hooks/auth/types';
 import {
   useLoginMutation,
   useRegistMutation,
 } from '../../hooks/auth/useAuthFetch';
 import useAuthStore from '../../hooks/auth/useAuthStore';
+import { verifyEmail } from '../../lib/function/verify';
 import Button from '../base/Button';
 
 const AuthFormBlock = styled.div`
@@ -48,6 +50,27 @@ const AuthForm = () => {
   const { form, setType, onInputChange, type } = useAuthStore();
   const { mutate: login } = useLoginMutation();
   const { mutate: regist } = useRegistMutation();
+
+  const validate = ({
+    id,
+    password,
+  }: Omit<AuthInputForm, 'passwordConfirm'>) => {
+    if (id === '' || password === '') {
+      return alert('아이디와 비밀번호를 입력하세요.');
+    }
+    if (verifyEmail(id) === false) {
+      return alert('이메일 형식이 아닙니다.');
+    }
+    if (password.length < 8) {
+      return alert('비밀번호는 8자리 이상이여야 합니다.');
+    }
+  };
+  const registValidate = ({ id, password, passwordConfirm }: AuthInputForm) => {
+    validate({ id, password });
+    if (password !== passwordConfirm) {
+      return alert('비밀번호가 일치하지 않습니다.');
+    }
+  };
   return (
     <AuthFormBlock>
       <h3>{type === 'LOGIN' ? '로그인' : '회원가입'}</h3>
@@ -55,8 +78,10 @@ const AuthForm = () => {
         onSubmit={(e) => {
           e.preventDefault();
           if (type === 'LOGIN') {
-            login({ ...form });
+            validate({ id: form.id, password: form.password });
+            login({ id: form.id, password: form.password });
           } else {
+            registValidate({ ...form });
             regist({ ...form });
           }
         }}

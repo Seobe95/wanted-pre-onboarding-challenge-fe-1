@@ -53,11 +53,14 @@ export const useGetTodoQuery = ({ token }: { token: string }) => {
   return useQuery<{ data: TodoFetchResult[] }, AxiosError, TodoFetchResult[]>(
     ['GET_TODO_LIST', token],
     async (token): Promise<{ data: TodoFetchResult[] }> => {
-      const response = await client.get('/todos', {
-        headers: {
-          Authorization: `${token}`,
+      const response = await client.get<{ data: { data: TodoFetchResult[] } }>(
+        '/todos',
+        {
+          headers: {
+            Authorization: `${token}`,
+          },
         },
-      });
+      );
       return response.data.data;
     },
     {
