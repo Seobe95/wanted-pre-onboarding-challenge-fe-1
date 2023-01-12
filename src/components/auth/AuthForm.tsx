@@ -1,9 +1,11 @@
 import styled from 'styled-components';
+import shallow from 'zustand/shallow';
 import { AuthInputForm } from '../../hooks/auth/types';
 import {
   useLoginMutation,
   useRegistMutation,
 } from '../../hooks/auth/useAuthFetch';
+import useAuthInputStore from '../../hooks/auth/useAuthInputStore';
 import useAuthStore from '../../hooks/auth/useAuthStore';
 import { verifyEmail } from '../../lib/function/verify';
 import Button from '../base/Button';
@@ -47,11 +49,23 @@ const Footer = styled.div`
 `;
 
 const AuthForm = () => {
-  const { form, setType, onInputChange, type } = useAuthStore();
+  const { setType, type } = useAuthStore();
+  const {
+    form: authInputForm,
+    onInputChange: onAuthInputForm,
+    initialize,
+  } = useAuthInputStore(
+    (state) => ({
+      form: state.form,
+      initialize: state.initialize,
+      onInputChange: state.onInputChange,
+    }),
+    shallow,
+  );
   const { mutate: login } = useLoginMutation();
   const { mutate: regist } = useRegistMutation();
 
-  const validate = ({
+  const loginValidate = ({
     id,
     password,
   }: Omit<AuthInputForm, 'passwordConfirm'>) => {
@@ -66,7 +80,7 @@ const AuthForm = () => {
     }
   };
   const registValidate = ({ id, password, passwordConfirm }: AuthInputForm) => {
-    validate({ id, password });
+    loginValidate({ id, password });
     if (password !== passwordConfirm) {
       return alert('비밀번호가 일치하지 않습니다.');
     }
@@ -78,35 +92,38 @@ const AuthForm = () => {
         onSubmit={(e) => {
           e.preventDefault();
           if (type === 'LOGIN') {
-            validate({ id: form.id, password: form.password });
-            login({ id: form.id, password: form.password });
+            loginValidate({
+              id: authInputForm.id,
+              password: authInputForm.password,
+            });
+            login({ id: authInputForm.id, password: authInputForm.password });
           } else {
-            registValidate({ ...form });
-            regist({ ...form });
+            registValidate({ ...authInputForm });
+            regist({ ...authInputForm });
           }
         }}
       >
         <StyledInput
           type="email"
           placeholder="아이디"
-          value={form.id}
+          value={authInputForm.id}
           name="id"
-          onChange={onInputChange}
+          onChange={onAuthInputForm}
         />
         <StyledInput
           type="password"
           placeholder="비밀번호"
           name="password"
-          value={form.password}
-          onChange={onInputChange}
+          value={authInputForm.password}
+          onChange={onAuthInputForm}
         />
         {type === 'REGIST' && (
           <StyledInput
             name="passwordConfirm"
             type="password"
             placeholder="비밀번호 확인"
-            value={form.passwordConfirm}
-            onChange={onInputChange}
+            value={authInputForm.passwordConfirm}
+            onChange={onAuthInputForm}
           />
         )}
         <ButtonWithMarginTop
@@ -118,7 +135,12 @@ const AuthForm = () => {
           {type === 'LOGIN' ? '로그인' : '회원가입'}
         </ButtonWithMarginTop>
       </form>
-      <Footer onClick={setType}>
+      <Footer
+        onClick={() => {
+          setType();
+          initialize();
+        }}
+      >
         {type !== 'LOGIN' ? '로그인' : '회원가입'}
       </Footer>
     </AuthFormBlock>

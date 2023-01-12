@@ -3,8 +3,7 @@ import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import client from '../../lib/api/client';
 import { TodoFetchResult, TodoInputForm } from './types';
-import useTodoStore from './useTodoStore';
-import useTodoInputStore from './useTodoStore';
+import useTodoInput from './useTodoInputStore';
 
 interface CreateTodoPrameterType extends TodoInputForm {
   token: string;
@@ -16,7 +15,7 @@ interface EditTodoPrameterType extends CreateTodoPrameterType {
 
 export const useCreateTodoQuery = () => {
   const queryClient = useQueryClient();
-  const initialize = useTodoStore((state) => state.initialize);
+  const initialize = useTodoInput((state) => state.initialize);
   return useMutation<TodoFetchResult, AxiosError, CreateTodoPrameterType>(
     async ({ title, content, token }: CreateTodoPrameterType) => {
       const response = await client.post<
@@ -136,7 +135,6 @@ export const useUpdateTodoMutation = () => {
 export const useDeleteTodoMutation = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const initialize = useTodoInputStore((state) => state.initialize);
   return useMutation<
     TodoFetchResult,
     AxiosError,
@@ -156,7 +154,6 @@ export const useDeleteTodoMutation = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries('GET_TODO_LIST');
-        initialize();
         navigate('/', {
           replace: true,
         });

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import styled from 'styled-components';
 import useAuthStore from '../../hooks/auth/useAuthStore';
 import { useCreateTodoQuery } from '../../hooks/todos/useTodoFetch';
-import useTodoStore from '../../hooks/todos/useTodoStore';
+import useTodoInputStore from '../../hooks/todos/useTodoInputStore';
 import Button from '../base/Button';
 
 const TodoFormBlock = styled.div`
@@ -47,33 +47,38 @@ const StyledInputWithMarginTop = styled(StyledInput)`
 
 const TodoForm = () => {
   const token = useAuthStore((state) => state.token);
-  const { form, initialize, onInputChange } = useTodoStore();
+  const {
+    form: todoInputForm,
+    initialize: todoInputInitializeHandler,
+    onInputChange: onTodoInputChange,
+  } = useTodoInputStore();
+
   const create = useCreateTodoQuery();
+
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    todoInputInitializeHandler();
+  }, [todoInputInitializeHandler]);
 
   return (
     <TodoFormBlock>
       <StyledForm
         onSubmit={(e) => {
           e.preventDefault();
-          create.mutate({ ...form, token });
-          initialize();
+          create.mutate({ ...todoInputForm, token });
         }}
       >
         <InputBlock>
           <StyledInput
             placeholder="무얼 해야할까요?"
-            value={form.title}
+            value={todoInputForm.title}
             name="title"
-            onChange={onInputChange}
+            onChange={onTodoInputChange}
           ></StyledInput>
           <StyledInputWithMarginTop
             placeholder="자세한 내용을 적어보세요."
-            value={form.content}
+            value={todoInputForm.content}
             name="content"
-            onChange={onInputChange}
+            onChange={onTodoInputChange}
           ></StyledInputWithMarginTop>
         </InputBlock>
         <Button fullWidth={false}>작성하기</Button>

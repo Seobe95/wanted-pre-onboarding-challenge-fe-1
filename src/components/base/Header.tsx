@@ -4,7 +4,7 @@ import Button from './Button';
 import Responsive from './Responsive';
 import useAuthStore from '../../hooks/auth/useAuthStore';
 
-const HeaderBlock = styled.div`
+const HeaderBlock = styled.nav`
   position: fixed;
   width: 100%;
   background: white;
@@ -35,7 +35,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
   return (
-    <>
+    <header>
       <HeaderBlock>
         <Wrapper>
           <Link to="/" className="logo">
@@ -47,7 +47,7 @@ const Header = () => {
               onClick={() => {
                 logout();
                 alert('로그아웃 하셨습니다.');
-                return navigate('/auth');
+                navigate('/auth', { replace: true });
               }}
             >
               로그아웃
@@ -56,7 +56,7 @@ const Header = () => {
         </Wrapper>
       </HeaderBlock>
       <Spacer />
-    </>
+    </header>
   );
 };
 

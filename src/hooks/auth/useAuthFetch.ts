@@ -9,8 +9,8 @@ import shallow from 'zustand/shallow';
 
 /** 로그인시 사용하는 비동기 작업을 관리하는 hook */
 export function useLoginMutation() {
-  const { setToken, initialize } = useAuthStore(
-    (state) => ({ setToken: state.setToken, initialize: state.initialize }),
+  const { setToken } = useAuthStore(
+    (state) => ({ setToken: state.setToken }),
     shallow,
   );
   const navigate = useNavigate();
@@ -35,9 +35,7 @@ export function useLoginMutation() {
       onSuccess(e) {
         setToken(e.token);
         setLocalstorage(e.token);
-        initialize();
         navigate('/', { replace: true });
-        // window.location.href = '/';
       },
       onError(error) {
         alert('로그인에 실패하였습니다.');
@@ -51,13 +49,13 @@ export function useRegistMutation(): UseMutationResult<
   AxiosError,
   AuthInputForm
 > {
-  const { setToken, initialize } = useAuthStore(
-    (state) => ({ setToken: state.setToken, initialize: state.initialize }),
+  const { setToken } = useAuthStore(
+    (state) => ({ setToken: state.setToken }),
     shallow,
   );
   const navigate = useNavigate();
   return useMutation(
-    async ({ id, password, passwordConfirm }) => {
+    async ({ id, password }) => {
       const response = await client.post<
         AuthFetchResult,
         { data: AuthFetchResult },
@@ -73,7 +71,6 @@ export function useRegistMutation(): UseMutationResult<
       onSuccess(e) {
         setLocalstorage(e.token);
         setToken(e.token);
-        initialize();
         navigate('/', { replace: true });
       },
       onError(error) {

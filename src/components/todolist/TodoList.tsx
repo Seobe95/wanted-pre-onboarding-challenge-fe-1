@@ -4,6 +4,7 @@ import shallow from 'zustand/shallow';
 import useAuthStore from '../../hooks/auth/useAuthStore';
 import { TodoFetchResult } from '../../hooks/todos/types';
 import { useGetTodoQuery } from '../../hooks/todos/useTodoFetch';
+import useTodoInput from '../../hooks/todos/useTodoInputStore';
 import useTodoStore from '../../hooks/todos/useTodoStore';
 import Responsive from '../base/Responsive';
 
@@ -44,14 +45,14 @@ const TodoItemBlock = styled.div`
 
 const TodoItem = ({ item }: TodoItemProps) => {
   const { id, content, title } = item;
-  const { initialize, isEditMode, setIsEditMode } = useTodoStore(
+  const { isEditMode, setIsEditMode } = useTodoStore(
     (state) => ({
-      initialize: state.initialize,
       isEditMode: state.isEditMode,
       setIsEditMode: state.setIsEditMode,
     }),
     shallow,
   );
+  const { initialize } = useTodoInput();
   const onClick = () => {
     if (isEditMode) {
       initialize();

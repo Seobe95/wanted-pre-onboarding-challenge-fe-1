@@ -8,6 +8,9 @@ import useAuthStore from '../../hooks/auth/useAuthStore';
 import Button from '../base/Button';
 import useTodoStore from '../../hooks/todos/useTodoStore';
 import { useEffect } from 'react';
+import { customConfirm } from '../../lib/function/customConfirm';
+import useTodoInput from '../../hooks/todos/useTodoInputStore';
+import shallow from 'zustand/shallow';
 
 interface TodoDetailProps {
   id: string;
@@ -60,39 +63,66 @@ const MarginRightWithButton = styled(Button)`
 `;
 
 const TodoDetail = ({ id }: TodoDetailProps) => {
-  const token = useAuthStore((state) => state.token);
+  const { token } = useAuthStore();
   const { data } = useGetTodoByIdQuery({ token, id });
-  const { mutate: update } = useUpdateTodoMutation();
+  const { mutate: updateTodo } = useUpdateTodoMutation();
   const { mutate: deleteTodo } = useDeleteTodoMutation();
-  const { form, onInputChange, isEditMode, setIsEditMode, setForm } =
-    useTodoStore();
+  const { isEditMode, setIsEditMode } = useTodoStore(
+    (state) => ({
+      isEditMode: state.isEditMode,
+      setIsEditMode: state.setIsEditMode,
+    }),
+    shallow,
+  );
+  const { todoInputForm, onTodoInputChange, setTodoForm } = useTodoInput(
+    (state) => ({
+      todoInputForm: state.form,
+      onTodoInputChange: state.onInputChange,
+      setTodoForm: state.setForm,
+    }),
+    shallow,
+  );
 
   useEffect(() => {
     if (data && !isEditMode) {
-      setForm(data.title, data.content);
+      setTodoForm(data.title, data.content);
     }
     if (data && isEditMode) {
-      setForm(form.title, form.content);
+      setTodoForm(todoInputForm.title, todoInputForm.content);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, data]);
-
   if (data === undefined) {
     return <p>에러가 발생하였습니다.</p>;
   }
-  const title = data.title !== form.title ? form.title : data.title;
-  const content = data.content !== form.content ? form.content : data.content;
+  const title =
+    data.title !== todoInputForm.title ? todoInputForm.title : data.title;
+  const content =
+    data.content !== todoInputForm.content
+      ? todoInputForm.content
+      : data.content;
   if (isEditMode) {
     return (
       <TodoDetailBlock>
         <StyledTitle>
-          <StyledInput value={title} onChange={onInputChange} name="title" />
+          <StyledInput
+            value={title}
+            onChange={onTodoInputChange}
+            name="title"
+          />
           <div>
             <MarginRightWithButton
               fullWidth={false}
               onClick={() => {
-                update({ id, title: form.title, content: form.content, token });
-                setIsEditMode();
+                customConfirm('수정하시겠습니까?', () => {
+                  updateTodo({
+                    id,
+                    title: todoInputForm.title,
+                    content: todoInputForm.content,
+                    token,
+                  });
+                  setIsEditMode();
+                });
               }}
             >
               수정 완료
@@ -100,8 +130,13 @@ const TodoDetail = ({ id }: TodoDetailProps) => {
             <Button
               fullWidth={false}
               onClick={() => {
-                setForm(data.title, data.content);
-                setIsEditMode();
+                customConfirm(
+                  '수정을 취소하시면 현재 내용은 사라집니다.',
+                  () => {
+                    setTodoForm(data.title, data.content);
+                    setIsEditMode();
+                  },
+                );
               }}
             >
               수정 취소
@@ -110,7 +145,7 @@ const TodoDetail = ({ id }: TodoDetailProps) => {
         </StyledTitle>
         <StyledInputContent
           value={content}
-          onChange={onInputChange}
+          onChange={onTodoInputChange}
           name="content"
         />
       </TodoDetailBlock>
@@ -132,7 +167,12 @@ const TodoDetail = ({ id }: TodoDetailProps) => {
           <Button
             fullWidth={false}
             onClick={() => {
-              deleteTodo({ id, token });
+              customConfirm(
+                '삭제된 데이터는 복구되지 않습니다. 삭제하시겠습니까?',
+                () => {
+                  deleteTodo({ id, token });
+                },
+              );
             }}
           >
             삭제
